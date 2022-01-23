@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo gazebo ./Plansza/Srodowisko_Sim
+sudo gazebo ./Plansza/Projekt_zespolowy_plansza

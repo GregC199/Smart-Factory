@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/greg/Pulpit/AGV_PPot/gazebo_plugin/devel/setup.sh
