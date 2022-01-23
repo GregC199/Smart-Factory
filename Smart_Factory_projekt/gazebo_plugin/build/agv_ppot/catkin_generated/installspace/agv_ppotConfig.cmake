@@ -67,14 +67,14 @@ set(agv_ppot_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(agv_ppot_SOURCE_PREFIX /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src/agv_ppot)
-  set(agv_ppot_DEVEL_PREFIX /home/greg/Pulpit/AGV_PPot/gazebo_plugin/devel)
+  set(agv_ppot_SOURCE_PREFIX /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/src/agv_ppot)
+  set(agv_ppot_DEVEL_PREFIX /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/devel)
   set(agv_ppot_INSTALL_PREFIX "")
   set(agv_ppot_PREFIX ${agv_ppot_DEVEL_PREFIX})
 else()
   set(agv_ppot_SOURCE_PREFIX "")
   set(agv_ppot_DEVEL_PREFIX "")
-  set(agv_ppot_INSTALL_PREFIX /home/greg/Pulpit/AGV_PPot/gazebo_plugin/install)
+  set(agv_ppot_INSTALL_PREFIX /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/install)
   set(agv_ppot_PREFIX ${agv_ppot_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/greg/Pulpit/AGV_PPot/gazebo_plugin/install/lib;/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/devel/lib;/home/greg/Pulpit/AGV_PPot/gazebo_plugin/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/install/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

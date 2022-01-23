@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/install")
+  set(CMAKE_INSTALL_PREFIX "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

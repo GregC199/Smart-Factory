@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/install")
+  set(CMAKE_INSTALL_PREFIX "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/gtest/googletest/cmake_install.cmake")
+  include("/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/gtest/googletest/cmake_install.cmake")
 
 endif()
 

@@ -1,8 +1,8 @@
-# Install script for directory: /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src/agv_ppot
+# Install script for directory: /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/src/agv_ppot
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/install")
+  set(CMAKE_INSTALL_PREFIX "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/agv_ppot/catkin_generated/installspace/agv_ppot.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/agv_ppot/catkin_generated/installspace/agv_ppot.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/agv_ppot/cmake" TYPE FILE FILES
-    "/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/agv_ppot/catkin_generated/installspace/agv_ppotConfig.cmake"
-    "/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/agv_ppot/catkin_generated/installspace/agv_ppotConfig-version.cmake"
+    "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/agv_ppot/catkin_generated/installspace/agv_ppotConfig.cmake"
+    "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/agv_ppot/catkin_generated/installspace/agv_ppotConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/agv_ppot" TYPE FILE FILES "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/src/agv_ppot/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/agv_ppot" TYPE FILE FILES "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/src/agv_ppot/package.xml")
 endif()
 

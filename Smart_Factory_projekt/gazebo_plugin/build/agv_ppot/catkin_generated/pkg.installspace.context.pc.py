@@ -4,5 +4,5 @@ PROJECT_PKG_CONFIG_INCLUDE_DIRS = "".split(';') if "" != "" else []
 PROJECT_CATKIN_DEPENDS = "".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "agv_ppot"
-PROJECT_SPACE_DIR = "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/install"
+PROJECT_SPACE_DIR = "/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/install"
 PROJECT_VERSION = "0.0.0"

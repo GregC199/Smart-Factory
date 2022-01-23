@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src
+CMAKE_SOURCE_DIR = /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build
+CMAKE_BINARY_DIR = /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -137,9 +137,9 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/CMakeFiles /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/CMakeFiles /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

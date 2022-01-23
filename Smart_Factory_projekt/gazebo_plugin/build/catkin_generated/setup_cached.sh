@@ -7,4 +7,7 @@
 # new environment variables
 
 # modified environment variables
-export PWD='/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build'
+export CMAKE_PREFIX_PATH="/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/devel:$CMAKE_PREFIX_PATH"
+export PWD='/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/build'
+export ROSLISP_PACKAGE_DIRECTORIES='/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/devel/share/common-lisp'
+export ROS_PACKAGE_PATH="/home/greg/git/Smart-Factory/Smart_Factory_projekt/gazebo_plugin/src:$ROS_PACKAGE_PATH"
