@@ -9,6 +9,7 @@ import math
 import sympy as sym
 from sympy import *
 from std_msgs.msg._Float64MultiArray import Float64MultiArray
+from sensor_msgs.msg import LaserScan
 #########################################################################################################
 
 
@@ -204,6 +205,24 @@ def get_Goal(data):
     #print(data.data)
        
 sub_goal = rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic containing goal position
+
+#######################################################################
+#######################################################################
+'''
+LIDAR scan reading.
+
+Laser data transfer reading function. 
+Lidar data is being prepared every 10ms inside LIDAR_sampling.py.
+'''
+scan_arr = []
+def LIDAR_scan(data): 
+    global scan_arr
+    global sub_scan
+    
+    scan_arr = data.ranges
+    
+sub_scan = rospy.Subscriber('LIDAR_scan', LaserScan, LIDAR_scan)      #Identify the subscriber "sub_scan" to subscribe topic containing laser scan data
+
 #######################################################################
 #######################################################################
 '''

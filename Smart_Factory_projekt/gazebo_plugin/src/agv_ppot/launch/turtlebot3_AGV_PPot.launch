@@ -35,4 +35,6 @@
   </node>
   <node pkg="agv_ppot" name="AGVInterfejsApp" type="AGVInterfejsApp.py">
   </node>
+  <node pkg="agv_ppot" name="Lidar" type="LIDAR_sampling.py">
+  </node>
 </launch>
