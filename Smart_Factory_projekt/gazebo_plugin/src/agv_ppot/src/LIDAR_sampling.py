@@ -33,7 +33,7 @@ sub_scan = rospy.Subscriber('/scan', LaserScan, LIDAR_scan_fun)      #Identify t
 
 iterator = 1
 
-while 1:
+while 1 and not rospy.is_shutdown():
     
     if data_acq == 1:
         print("ranges nr " + str(iterator) + "\n\n")
