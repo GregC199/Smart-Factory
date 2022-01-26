@@ -33,15 +33,15 @@ def LIDAR_scan_fun(data):
     
 sub_scan = rospy.Subscriber('/scan', LaserScan, LIDAR_scan_fun)      #Identify the subscriber "sub_scan" to subscribe topic containing laser scan data
 
-iterator = 1
+#iterator = 1
 
 
 while 1 and not rospy.is_shutdown():
     
     if data_acq == 1:
-        print("\n range " + str(iterator) + "\n\n")
-        iterator = iterator + 1
-        print(scan_data.ranges)
+        #print("\n range " + str(iterator) + "\n\n")
+        #iterator = iterator + 1
+        #print(scan_data.ranges)
         pub1.publish(scan_data)
         data_acq = 0
         rate.sleep()
