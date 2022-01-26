@@ -7,7 +7,8 @@ import numpy as np
 rospy.init_node('LIDAR_scan', anonymous=True) #Node Path planning "Pola Potencjalne" (eng. potential field)
 
 
-sampling_rate = 100
+sampling_rate = int(1.0/rospy.get_param("~sampling_time"))
+d_nonlimit = rospy.get_param("~d_nonlimit")
 
 pub1 = rospy.Publisher('LIDAR_scan', LaserScan, queue_size=sampling_rate) #Publisher "pub1" to publish at topic "LIDAR_scan" to send message with laser scan data
 
@@ -25,18 +26,21 @@ def LIDAR_scan_fun(data):
     
     scan_data.ranges = np.nan_to_num(scan_data.ranges, posinf=40)
     
+    scan_data.ranges = np.where(scan_data.ranges > d_nonlimit, 40, scan_data.ranges)
+    
     data_acq = 1
     
     
 sub_scan = rospy.Subscriber('/scan', LaserScan, LIDAR_scan_fun)      #Identify the subscriber "sub_scan" to subscribe topic containing laser scan data
 
-
 iterator = 1
+
 
 while 1 and not rospy.is_shutdown():
     
     if data_acq == 1:
-        print("ranges nr " + str(iterator) + "\n\n")
+        print("\n range " + str(iterator) + "\n\n")
+        iterator = iterator + 1
         print(scan_data.ranges)
         pub1.publish(scan_data)
         data_acq = 0

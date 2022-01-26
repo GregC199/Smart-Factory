@@ -25,7 +25,16 @@
 
     <param name="sampling_time" value="0.1" /> 
     <param name="rob_mass" value="1.8" /> 
+    
+    <param name="d_safe" value="0.4" /> 
+  	<param name="d_prewarn" value="0.75" /> 
+  	<param name="d_nonlimit" value="1.5" /> 
    </node>
+   
+  <node pkg="agv_ppot" name="Lidar" type="LIDAR_sampling.py">
+  	<param name="d_nonlimit" value="1.5" />
+  	<param name="sampling_time" value="0.5" />
+  </node>
 
   <node pkg="agv_ppot" name="Lapunov" type="Lapunov.py">
     <param name="K_x" value="0.5" />   
@@ -33,8 +42,7 @@
     <param name="Vd_des" value="0.0001" />   
     <param name="Omega_des" value="0.00" />
   </node>
+  
   <node pkg="agv_ppot" name="AGVInterfejsApp" type="AGVInterfejsApp.py">
-  </node>
-  <node pkg="agv_ppot" name="Lidar" type="LIDAR_sampling.py">
   </node>
 </launch>

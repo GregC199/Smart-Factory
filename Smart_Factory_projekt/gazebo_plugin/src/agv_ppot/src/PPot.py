@@ -23,7 +23,7 @@ PPot_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep")] #Reinforcemen
 tau = rospy.get_param("~sampling_time") #Sampling Time
 rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
-Rob_rate = 10
+Rob_rate = int(1/tau)
 #######################################################################
 #ROS publisher code for velocity
 pub1 = rospy.Publisher('/PPot_Des_Pos', Pose, queue_size=10) #Publisher "pub1" to publish at topic "/PPot_Des_Pos" to send message with destination
@@ -38,9 +38,9 @@ Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0
 Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
 
 #Algorithm parameters
-dsafe=0.4 # Safe distance
-dprewarn=0.75 # Prewarning distance
-dnonlimit=1.5 # Increased speed distance
+dsafe=rospy.get_param("~d_safe") # Safe distance 0.4
+dprewarn=rospy.get_param("~d_prewarn") # Prewarning distance 0.75
+dnonlimit=rospy.get_param("~d_nonlimit") # Increased speed distance 1.5
 
 
 #######################################################################
