@@ -31,11 +31,7 @@ Des_Pos_msg = Pose() #Identify msg variable for sending destination
 rate = rospy.Rate(Rob_rate) #Rate of publishing msg 10hz
 #######################################################################
 #Hard coded placement of obstacles
-Obs_Pos_x = [ -7.5,-5.5,-3.5,-1.5,  5.0,5.0,  -8.5, -7.5, -5.5, -4.5, -3.5, -1.5, -1.5, 2.5, 4.5, 3.5, 4.5, 7.5 ]
-Obs_Pos_y = [ -6.0,-6.0,-6.0,-6.0,  -7.5,-4.5,  1.5, 7.5, 4.5, 7.5, 1.5, 2.5, 6.5, 0.5, 6.5, 1.5, 2.5, 4.5 ]
-#Hard coded length of obstacles
-Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
-Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
+Map_tab = np.zeros((200,200))
 
 #Algorithm parameters
 dsafe=rospy.get_param("~d_safe") # Safe distance 0.4
@@ -215,11 +211,42 @@ Laser data transfer reading function.
 Lidar data is being prepared every 10ms inside LIDAR_sampling.py.
 '''
 scan_arr = []
+obs_ang = []
+
+yaw_add = 0.0
+amount_obs_det = 0
+
 def LIDAR_scan(data): 
     global scan_arr
     global sub_scan
+    global yaw_add
+    global position
+    global amount_obs_det
+    global obs_ang
+    global Map_tab
     
-    scan_arr = data.ranges
+    scan_arr = np.array(data.ranges)
+    
+    yaw_add = position[3]
+    
+    tmp_ang = 0.0
+    
+    obs_x = 0.0
+    obs_y = 0.0
+    
+    tmp = np.where(scan_arr < 40)
+    obs_ang = tmp[0]
+    amount_obs_det = len(obs_ang)
+    
+    
+    for i in range(amount_obs_det):
+        tmp_ang = obs_ang[i]*math.pi/(180) + yaw_add   
+        obs_x = int(round((position[0] + scan_arr[obs_ang[i]]*cos(tmp_ang)),1)*10)+100
+        obs_y = int(round((position[1] + scan_arr[obs_ang[i]]*sin(tmp_ang)),1)*10)+100
+        
+        Map_tab[obs_x][obs_y] = 1
+    
+    
     
 sub_scan = rospy.Subscriber('LIDAR_scan', LaserScan, LIDAR_scan)      #Identify the subscriber "sub_scan" to subscribe topic containing laser scan data
 
@@ -232,95 +259,146 @@ Calculates the attraction and repulsion forces for current robot position.
 The attraction force is reinforced with parabolic paramter to flatten the force.
 '''
 #######################################################################
-def PPot_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,PPot_Param,dsafe,Obs_len_x,Obs_len_y):
+def PPot_Fn(Rob_pos,Goal_pos,Map_tab,PPot_Param,dsafe):
     
     #Calculation of distance between robot and goal
     d_goal = sqrt((Rob_pos[0]-Goal_pos[0])**2+(Rob_pos[1]-Goal_pos[1])**2)
     
     #Initial calculation of attraction value
-    Fx_att_val = -(0.05+1.6/(d_goal+0.165))*PPot_Param[0]*(Rob_pos[0]-Goal_pos[0])
-    Fy_att_val = -(0.05+1.6/(d_goal+0.165))*PPot_Param[0]*(Rob_pos[1]-Goal_pos[1])
+    Fx_att_val = -(0.05+1.6/(d_goal+0.11))*PPot_Param[0]*(Rob_pos[0]-Goal_pos[0])
+    Fy_att_val = -(0.05+1.6/(d_goal+0.11))*PPot_Param[0]*(Rob_pos[1]-Goal_pos[1])
 
     #Definitions of initial repulsion values
     Fx_rep_val=0.0
     Fy_rep_val=0.0
     
-    j=0     #While loop iterator of obstacles
-    
     flag_safe = 0 #Flag for crossing of robot safe distance
+    flag_prewarn = 0 #Flag for crossing of robot prewarning distance
+    flag_nonlim = 0 #Flag for crossing of robot nonlimited distance
     
-    
+    obs_len = 0.05
     d_obs_min = 20.0 #Definition of starting minimal obstacle distance
     
     #Nonlimited speed linearization parameters
     a = 0.0
     b = 0.0
     
-    #While loop of repulsion forces calculations
-    while j<18:
+    rob_x = int(round(Rob_pos[0],1)*10)+100
+    rob_y = int(round(Rob_pos[1],1)*10)+100
+    
+    x = rob_x - int(dprewarn*10)   
+    y = rob_y - int(dprewarn*10)   
+    x_max = x + int(2*dprewarn*10+1)
+    y_max = y + int(2*dprewarn*10+1)
+    
+    if x<0:
+        x = 0
+    if x_max>201:
+        x_max = 201
         
-        #Initialization of repulsion values
-        Fx_rep_val_t = 0.0
-        Fy_rep_val_t = 0.0
+    if y<0:
+        y = 0
+    if y_max>201:
+        y_max = 201
+        
+    obs_pos = np.array(np.where(Map_tab[x:x_max,y:y_max] == 1))
+    amount_obs = len(obs_pos[0])
+    
+    if amount_obs < 1:
+        x = rob_x - int(dnonlimit*10)   
+        y = rob_y - int(dnonlimit*10)   
+        x_max = x + int(2*dnonlimit*10+1)
+        y_max = y + int(2*dnonlimit*10+1)
+        
+        if x<0:
+            x = 0
+        if x_max>201:
+            x_max = 201
+            
+        if y<0:
+            y = 0
+        if y_max>201:
+            y_max = 201
+            
+        obs_pos = np.array(np.where(Map_tab[x:x_max,y:y_max] == 1))
+        amount_obs = len(obs_pos[0])
+        if amount_obs < 1:
+            flag_nonlim = 1
+    else:
+        flag_prewarn = 1
+        
+    rob_center_x = Rob_pos[0]*10.0+100.0-float(x)
+    rob_center_y = Rob_pos[1]*10.0+100.0-float(y)
+        
+    j = 0
+     
+    #While loop of repulsion forces calculations
+    while j<amount_obs:
         
         #Calculation of distance between robot and center of obstacle for x and y-axis
-        d_obs_val_x = sqrt((Rob_pos[0]-Obs_pos_x[j])**2)
-        d_obs_val_y = sqrt((Rob_pos[1]-Obs_pos_y[j])**2)
+        d_obs_val_x = sqrt(((rob_center_x - obs_pos[0,j])*0.1)**2)
+        d_obs_val_y = sqrt(((rob_center_y - obs_pos[1,j])*0.1)**2)
         
         #Supplementation of calculation with obstacle walls length
-        if(d_obs_val_x < Obs_len_x[j]):
-            if(d_obs_val_y < Obs_len_y[j]):
+        if(d_obs_val_x < obs_len):
+            if(d_obs_val_y < obs_len):
                 d_obs_rob = 0.0
             else:
-                d_obs_rob = sqrt((d_obs_val_y-Obs_len_y[j])**2)
+                d_obs_rob = sqrt((d_obs_val_y-obs_len)**2)
         else:
-            if(d_obs_val_y < Obs_len_y[j]):
-                d_obs_rob = sqrt((d_obs_val_x-Obs_len_x[j])**2)
+            if(d_obs_val_y < obs_len):
+                d_obs_rob = sqrt((d_obs_val_x-obs_len)**2)
             else:
-                d_obs_rob = sqrt((d_obs_val_x-Obs_len_x[j])**2+(d_obs_val_y-Obs_len_y[j])**2)
-        
+                d_obs_rob = sqrt((d_obs_val_x-obs_len)**2+(d_obs_val_y-obs_len)**2)
+            
         #Replacement of previous minimal distance between robot and obstacle
         if d_obs_rob < d_obs_min:
             d_obs_min = d_obs_rob
-        
-        #Calculation of repulsion forces of number 'j' obstacle in the prewarning range 
-        if d_obs_rob < dprewarn:
-            Fx_rep_val_t = 1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((Rob_pos[0]-Obs_pos_x[j])/(d_obs_rob**3))
-            Fy_rep_val_t = 1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((Rob_pos[1]-Obs_pos_y[j])/(d_obs_rob**3))                                                       
-        elif (d_obs_rob < dsafe):
-            flag_safe = 1 #Setting up for the crossing of safe distance by robot
             
-            #Further reinforcement of repulsion forces after crossing safe distance
-            Fx_rep_val_t = 6.0*Fx_rep_val_t
-            Fy_rep_val_t = 6.0*Fy_rep_val_t
-        else:
-            Fx_rep_val_t = 0.0 #Setting repulsion forces to 0 that arent in the prewarning range
+            
+        if flag_prewarn == 1:
+            #Initialization of repulsion values
+            Fx_rep_val_t = 0.0
             Fy_rep_val_t = 0.0
             
-        #Increasing repulsion force with "j" obstacle repulsion
-        Fx_rep_val += Fx_rep_val_t
-        Fy_rep_val += Fy_rep_val_t
+            #Calculation of repulsion forces of number 'j' obstacle in the prewarning range 
+            if d_obs_rob < dprewarn:
+                Fx_rep_val_t = (2/amount_obs)*1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((rob_center_x - obs_pos[0,j])/(d_obs_rob**3))
+                Fy_rep_val_t = (2/amount_obs)*1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((rob_center_y - obs_pos[1,j])/(d_obs_rob**3))                                                       
+            elif (d_obs_rob < dsafe):
+                flag_safe = 1 #Setting up for the crossing of safe distance by robot
+                
+                #Further reinforcement of repulsion forces after crossing safe distance
+                Fx_rep_val_t = 4.0*Fx_rep_val_t*amount_obs/3
+                Fy_rep_val_t = 4.0*Fy_rep_val_t*amount_obs/3
+            else:
+                Fx_rep_val_t = 0.0 #Setting repulsion forces to 0 that arent in the prewarning range
+                Fy_rep_val_t = 0.0
+                
+            #Increasing repulsion force with "j" obstacle repulsion
+            Fx_rep_val += Fx_rep_val_t
+            Fy_rep_val += Fy_rep_val_t
         
         j +=1 #Increment "j" number of obstacle
         
     #Letting the robot to dive in the repulsion field if it fits
-    if ((d_obs_min - 0.25) >  d_goal):
+    if ((d_obs_min - 0.2) >  d_goal):
         Fx_rep_val = Fx_rep_val*d_goal*0.5
         Fy_rep_val = Fy_rep_val*d_goal*0.5
     
     #Robot forces change depending on safe distance crossing    
     if flag_safe == 1:
-        Fx_net_val = (Fx_att_val + Fx_rep_val)/3.0
-        Fy_net_val = (Fy_att_val + Fy_rep_val)/3.0
+        Fx_net_val = (Fx_att_val + Fx_rep_val)/2.0
+        Fy_net_val = (Fy_att_val + Fy_rep_val)/2.0
     else:
         Fx_net_val = Fx_att_val + Fx_rep_val
         Fy_net_val = Fy_att_val + Fy_rep_val
         
     #Reinforcement of robot forces when there is no risk of hitting obstacle
-    if (d_obs_min > dnonlimit):
+    if flag_nonlim == 1:
         Fx_net_val = Fx_net_val*4.0
         Fy_net_val = Fy_net_val*4.0
-    elif ((d_obs_min <= dnonlimit) and (d_obs_min > dprewarn)):
+    elif ((flag_nonlim == 0) and (flag_prewarn == 0)):
         #Linearization of forces to match the increased speed distance
         a = -3.0 / ( dprewarn - dnonlimit )
         b = 4.0 - a * dnonlimit
@@ -329,8 +407,8 @@ def PPot_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,PPot_Param,dsafe,Obs_len_x,Obs_
         
     #Decreasion of forces to stop robot scrabbling close to goal point
     if (d_goal < 0.05):
-        Fx_net_val = Fx_net_val*0.5
-        Fy_net_val = Fy_net_val*0.5
+        Fx_net_val = Fx_net_val*0.2
+        Fy_net_val = Fy_net_val*0.2
         
     F_xy_net = [Fx_net_val,Fy_net_val]
     return F_xy_net
@@ -349,7 +427,7 @@ while 1 and not rospy.is_shutdown():
         Rob_vel = [velocity[0],velocity[5]]
         
         #PPot function call
-        F_xy_net = PPot_Fn(Rob_pos,Goal_Pos,Obs_Pos_x,Obs_Pos_y,PPot_Param,dsafe,Obs_len_x,Obs_len_y)
+        F_xy_net = PPot_Fn(Rob_pos,Goal_Pos,Map_tab,PPot_Param,dsafe)
         
         #Calculation of distance and direction of movement
         F_net = float(sqrt(F_xy_net[0]**2 + F_xy_net[1]**2))

@@ -10,7 +10,7 @@ rospy.init_node('LIDAR_scan', anonymous=True) #Node Path planning "Pola Potencja
 sampling_rate = int(1.0/rospy.get_param("~sampling_time"))
 d_nonlimit = rospy.get_param("~d_nonlimit")
 
-pub1 = rospy.Publisher('LIDAR_scan', LaserScan, queue_size=sampling_rate) #Publisher "pub1" to publish at topic "LIDAR_scan" to send message with laser scan data
+pub1 = rospy.Publisher('LIDAR_scan', LaserScan, queue_size=500) #Publisher "pub1" to publish at topic "LIDAR_scan" to send message with laser scan data
 
 rate = rospy.Rate(sampling_rate)
 
@@ -26,7 +26,7 @@ def LIDAR_scan_fun(data):
     
     scan_data.ranges = np.nan_to_num(scan_data.ranges, posinf=40)
     
-    scan_data.ranges = np.where(scan_data.ranges > d_nonlimit, 40, scan_data.ranges)
+    scan_data.ranges = np.where(scan_data.ranges > (2.5), 40, scan_data.ranges)
     
     data_acq = 1
     
