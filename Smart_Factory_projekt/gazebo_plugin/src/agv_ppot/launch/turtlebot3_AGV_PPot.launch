@@ -20,19 +20,21 @@
     <param name="x_Goal" value="0.0" />   
     <param name="y_Goal" value="0.0"/>
 
-    <param name="K_att" value="20" />   
-    <param name="K_rep" value="1" /> 
+    <param name="K_att" value="45" />   
+    <param name="K_rep" value="0.2" /> 
 
     <param name="sampling_time" value="0.1" /> 
     <param name="rob_mass" value="1.8" /> 
     
-    <param name="d_safe" value="0.3" /> 
-  	<param name="d_prewarn" value="0.5" /> 
-  	<param name="d_nonlimit" value="1.0" /> 
+    <param name="d_safe" value="0.4" /> 
+  	<param name="d_prewarn" value="0.6" /> 
+  	<param name="d_nonlimit" value="1.6" />
+  	<param name="map_sampling" value="0.2" />
+  	 
    </node>
    
   <node pkg="agv_ppot" name="Lidar" type="LIDAR_sampling.py">
-  	<param name="d_nonlimit" value="1.5" />
+  	<param name="d_nonlimit" value="1.6" />
   	<param name="sampling_time" value="1.0" />
   </node>
 

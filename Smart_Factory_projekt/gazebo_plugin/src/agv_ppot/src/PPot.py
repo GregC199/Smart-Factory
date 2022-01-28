@@ -23,7 +23,7 @@ PPot_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep")] #Reinforcemen
 tau = rospy.get_param("~sampling_time") #Sampling Time
 rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
-Rob_rate = int(1/tau)
+Rob_rate = round(1/tau)
 #######################################################################
 #ROS publisher code for velocity
 pub1 = rospy.Publisher('/PPot_Des_Pos', Pose, queue_size=10) #Publisher "pub1" to publish at topic "/PPot_Des_Pos" to send message with destination
@@ -31,7 +31,11 @@ Des_Pos_msg = Pose() #Identify msg variable for sending destination
 rate = rospy.Rate(Rob_rate) #Rate of publishing msg 10hz
 #######################################################################
 #Hard coded placement of obstacles
-Map_tab = np.zeros((200,200))
+map_sampling = rospy.get_param("~map_sampling")
+max_map_size = 20/map_sampling
+scaling_add = round(10/map_sampling)
+map_scaling = round(1/map_sampling)
+Map_tab = np.zeros((round(20/map_sampling),round(20/map_sampling)))
 
 #Algorithm parameters
 dsafe=rospy.get_param("~d_safe") # Safe distance 0.4
@@ -224,6 +228,7 @@ def LIDAR_scan(data):
     global amount_obs_det
     global obs_ang
     global Map_tab
+    global map_scaling
     
     scan_arr = np.array(data.ranges)
     
@@ -241,12 +246,12 @@ def LIDAR_scan(data):
     
     for i in range(amount_obs_det):
         tmp_ang = obs_ang[i]*math.pi/(180) + yaw_add   
-        obs_x = int(round((position[0] + scan_arr[obs_ang[i]]*cos(tmp_ang)),1)*10)+100
-        obs_y = int(round((position[1] + scan_arr[obs_ang[i]]*sin(tmp_ang)),1)*10)+100
+        obs_x = int(round((position[0] + scan_arr[obs_ang[i]]*cos(tmp_ang)),1)*map_scaling+10*map_scaling)
+        obs_y = int(round((position[1] + scan_arr[obs_ang[i]]*sin(tmp_ang)),1)*map_scaling+10*map_scaling)
         
-        Map_tab[obs_x][obs_y] = 1
-    
-    
+        Map_tab[obs_x,obs_y] = 1
+        
+    #print(Map_tab)
     
 sub_scan = rospy.Subscriber('LIDAR_scan', LaserScan, LIDAR_scan)      #Identify the subscriber "sub_scan" to subscribe topic containing laser scan data
 
@@ -265,60 +270,61 @@ def PPot_Fn(Rob_pos,Goal_pos,Map_tab,PPot_Param,dsafe):
     d_goal = sqrt((Rob_pos[0]-Goal_pos[0])**2+(Rob_pos[1]-Goal_pos[1])**2)
     
     #Initial calculation of attraction value
-    Fx_att_val = -(0.05+1.6/(d_goal+0.11))*PPot_Param[0]*(Rob_pos[0]-Goal_pos[0])
-    Fy_att_val = -(0.05+1.6/(d_goal+0.11))*PPot_Param[0]*(Rob_pos[1]-Goal_pos[1])
+    Fx_att_val = -(0.05+2/(d_goal+0.11))*PPot_Param[0]*(Rob_pos[0]-Goal_pos[0])
+    Fy_att_val = -(0.05+2/(d_goal+0.11))*PPot_Param[0]*(Rob_pos[1]-Goal_pos[1])
 
     #Definitions of initial repulsion values
-    Fx_rep_val=0.0
-    Fy_rep_val=0.0
+    Fx_rep_val = 0.0
+    Fy_rep_val = 0.0
     
     flag_safe = 0 #Flag for crossing of robot safe distance
     flag_prewarn = 0 #Flag for crossing of robot prewarning distance
     flag_nonlim = 0 #Flag for crossing of robot nonlimited distance
     
-    obs_len = 0.05
+    obs_len = map_sampling/2
     d_obs_min = 20.0 #Definition of starting minimal obstacle distance
+    
     
     #Nonlimited speed linearization parameters
     a = 0.0
     b = 0.0
     
-    rob_x = int(round(Rob_pos[0],1)*10)+100
-    rob_y = int(round(Rob_pos[1],1)*10)+100
+    rob_x = int(round(Rob_pos[0],1)*map_scaling+scaling_add)
+    rob_y = int(round(Rob_pos[1],1)*map_scaling+scaling_add)
     
-    x = rob_x - int(dprewarn*10)   
-    y = rob_y - int(dprewarn*10)   
-    x_max = x + int(2*dprewarn*10+1)
-    y_max = y + int(2*dprewarn*10+1)
+    x = int(rob_x - round(dprewarn*map_scaling))   
+    y = int(rob_y - round(dprewarn*map_scaling))   
+    x_max = int(x + round(2*dprewarn*map_scaling+1))
+    y_max = int(y + round(2*dprewarn*map_scaling+1))
     
     if x<0:
         x = 0
-    if x_max>201:
-        x_max = 201
+    if x_max>(20*map_scaling+1):
+        x_max = int(20*map_scaling + 1)
         
     if y<0:
         y = 0
-    if y_max>201:
-        y_max = 201
+    if y_max>(20*map_scaling+1):
+        y_max = int(20*map_scaling + 1)
         
     obs_pos = np.array(np.where(Map_tab[x:x_max,y:y_max] == 1))
     amount_obs = len(obs_pos[0])
     
     if amount_obs < 1:
-        x = rob_x - int(dnonlimit*10)   
-        y = rob_y - int(dnonlimit*10)   
-        x_max = x + int(2*dnonlimit*10+1)
-        y_max = y + int(2*dnonlimit*10+1)
+        x = int(rob_x - round(dnonlimit*map_scaling))   
+        y = int(rob_y - round(dnonlimit*map_scaling))   
+        x_max = int(x + round(2*dnonlimit*map_scaling+1))
+        y_max = int(y + round(2*dnonlimit*map_scaling+1))
         
         if x<0:
             x = 0
-        if x_max>201:
-            x_max = 201
+        if x_max>(20*map_scaling+1):
+            x_max = int(20*map_scaling+1)
             
         if y<0:
             y = 0
-        if y_max>201:
-            y_max = 201
+        if y_max>(20*map_scaling+1):
+            y_max = int(20*map_scaling+1)
             
         obs_pos = np.array(np.where(Map_tab[x:x_max,y:y_max] == 1))
         amount_obs = len(obs_pos[0])
@@ -327,17 +333,19 @@ def PPot_Fn(Rob_pos,Goal_pos,Map_tab,PPot_Param,dsafe):
     else:
         flag_prewarn = 1
         
-    rob_center_x = Rob_pos[0]*10.0+100.0-float(x)
-    rob_center_y = Rob_pos[1]*10.0+100.0-float(y)
+    rob_center_x = Rob_pos[0]*map_scaling+scaling_add-float(x)
+    rob_center_y = Rob_pos[1]*map_scaling+scaling_add-float(y)
         
     j = 0
      
     #While loop of repulsion forces calculations
     while j<amount_obs:
         
+        d_val_x = (rob_center_x - obs_pos[0,j])*map_sampling-obs_len
+        d_val_y = (rob_center_y - obs_pos[1,j])*map_sampling-obs_len
         #Calculation of distance between robot and center of obstacle for x and y-axis
-        d_obs_val_x = sqrt(((rob_center_x - obs_pos[0,j])*0.1)**2)
-        d_obs_val_y = sqrt(((rob_center_y - obs_pos[1,j])*0.1)**2)
+        d_obs_val_x = sqrt(d_val_x**2)
+        d_obs_val_y = sqrt(d_val_y**2)
         
         #Supplementation of calculation with obstacle walls length
         if(d_obs_val_x < obs_len):
@@ -363,14 +371,14 @@ def PPot_Fn(Rob_pos,Goal_pos,Map_tab,PPot_Param,dsafe):
             
             #Calculation of repulsion forces of number 'j' obstacle in the prewarning range 
             if d_obs_rob < dprewarn:
-                Fx_rep_val_t = (2/amount_obs)*1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((rob_center_x - obs_pos[0,j])/(d_obs_rob**3))
-                Fy_rep_val_t = (2/amount_obs)*1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((rob_center_y - obs_pos[1,j])/(d_obs_rob**3))                                                       
+                Fx_rep_val_t = 1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((d_val_x)/(d_obs_rob**3))
+                Fy_rep_val_t = 1.5*PPot_Param[1]*(1-(d_obs_rob/dprewarn))*((d_val_y)/(d_obs_rob**3))                                                       
             elif (d_obs_rob < dsafe):
                 flag_safe = 1 #Setting up for the crossing of safe distance by robot
                 
                 #Further reinforcement of repulsion forces after crossing safe distance
-                Fx_rep_val_t = 4.0*Fx_rep_val_t*amount_obs/3
-                Fy_rep_val_t = 4.0*Fy_rep_val_t*amount_obs/3
+                Fx_rep_val_t = 4.0*Fx_rep_val_t
+                Fy_rep_val_t = 4.0*Fy_rep_val_t
             else:
                 Fx_rep_val_t = 0.0 #Setting repulsion forces to 0 that arent in the prewarning range
                 Fy_rep_val_t = 0.0
@@ -388,8 +396,8 @@ def PPot_Fn(Rob_pos,Goal_pos,Map_tab,PPot_Param,dsafe):
     
     #Robot forces change depending on safe distance crossing    
     if flag_safe == 1:
-        Fx_net_val = (Fx_att_val + Fx_rep_val)/2.0
-        Fy_net_val = (Fy_att_val + Fy_rep_val)/2.0
+        Fx_net_val = (Fx_att_val*0.8 + Fx_rep_val)/2.0
+        Fy_net_val = (Fy_att_val*0.8 + Fy_rep_val)/2.0
     else:
         Fx_net_val = Fx_att_val + Fx_rep_val
         Fy_net_val = Fy_att_val + Fy_rep_val
@@ -406,9 +414,9 @@ def PPot_Fn(Rob_pos,Goal_pos,Map_tab,PPot_Param,dsafe):
         Fy_net_val = Fy_net_val*(d_obs_min*a+b)
         
     #Decreasion of forces to stop robot scrabbling close to goal point
-    if (d_goal < 0.05):
-        Fx_net_val = Fx_net_val*0.2
-        Fy_net_val = Fy_net_val*0.2
+    if (d_goal < 0.09):
+        Fx_net_val = Fx_net_val*0.1
+        Fy_net_val = Fy_net_val*0.1
         
     F_xy_net = [Fx_net_val,Fy_net_val]
     return F_xy_net
